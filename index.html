@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPK Pemilihan Kemasan Makanan Ramah Lingkungan | Metode SAW</title>
+    <meta name="description" content="Sistem Pendukung Keputusan Pemilihan Kemasan Makanan Ramah Lingkungan menggunakan Metode Simple Additive Weighting (SAW). Analisis dan rekomendasi kemasan terbaik berdasarkan kriteria lingkungan.">
+
+    <!-- Google Fonts: Poppins + Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config: Eco Green Palette -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50:  '#e8f5e9',
+                            100: '#c8e6c9',
+                            200: '#a5d6a7',
+                            300: '#81c784',
+                            400: '#66bb6a',
+                            500: '#43a047',
+                            600: '#2e7d32',
+                            700: '#1b5e20',
+                            800: '#145218',
+                            850: '#0e3a10',
+                            900: '#0b2a0d',
+                            950: '#071809',
+                        },
+                        secondary: {
+                            50:  '#f1f8e9',
+                            100: '#dcedc8',
+                            300: '#aed581',
+                            400: '#9ccc65',
+                            500: '#8bc34a',
+                            600: '#7cb342',
+                        },
+                        slate: {
+                            50:  '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+                            300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+                            600: '#475569', 700: '#334155', 800: '#1e293b',
+                            900: '#0f172a', 950: '#020617',
+                        }
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%':   { opacity: '0', transform: 'translateY(16px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.45s ease forwards',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== GLOBAL ===== */
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; }
+
+        /* ===== CUSTOM SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #81c784; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2e7d32; }
+        .dark ::-webkit-scrollbar-track { background: #0e2a0d; }
+        .dark ::-webkit-scrollbar-thumb { background: #2e7d32; }
+
+        /* ===== RANGE SLIDER ===== */
+        input[type=range] {
+            -webkit-appearance: none; appearance: none;
+            height: 5px; border-radius: 99px;
+            background: #c8e6c9; outline: none; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 17px; height: 17px; border-radius: 50%;
+            background: #2e7d32; border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(46,125,50,.3);
+            transition: transform .15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        .dark input[type=range] { background: #1b5e20; }
+        .dark input[type=range]::-webkit-slider-thumb { border-color: #0b2a0d; }
+
+        /* ===== ECO TABLE ===== */
+        .eco-table tbody tr:nth-child(even) { background-color: rgba(232,245,233,.35); }
+        .dark .eco-table tbody tr:nth-child(even) { background-color: rgba(27,94,32,.08); }
+
+        /* ===== CARD HOVER LIFT ===== */
+        .card-lift { transition: transform .2s ease, box-shadow .2s ease; }
+        .card-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(46,125,50,.13); }
+
+        /* ===== GREEN GRADIENT PROGRESS ===== */
+        .eco-bar { background: linear-gradient(90deg, #81c784, #43a047, #2e7d32); }
+
+        /* ===== CUSTOM SELECT ===== */
+        .eco-select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%232e7d32' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right .5rem center; background-repeat: no-repeat; background-size: 1.4em;
+            padding-right: 2.2rem;
+        }
+
+        /* ===== LEADERBOARD CARDS ===== */
+        .lb-card { transition: all .22s ease; }
+        .lb-card:hover { transform: scale(1.01); }
+
+        /* ===== PRINT ===== */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+        }
+    </style>
+</head>
+
+<body class="bg-[#F4F8F3] dark:bg-[#071809] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- ========== TOAST CONTAINER ========== -->
+    <div id="toast-container" class="fixed top-20 right-4 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ========== LOADING OVERLAY ========== -->
+    <div id="loading-overlay" class="fixed inset-0 bg-primary-900/75 backdrop-blur-sm z-[150] flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-primary-900 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs text-center border border-primary-100 dark:border-primary-800">
+            <div class="relative w-14 h-14 mb-4">
+                <div class="absolute inset-0 rounded-full border-4 border-primary-100 dark:border-primary-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-primary-500 dark:border-t-primary-400 animate-spin"></div>
+                <i class="fa-solid fa-leaf absolute inset-0 flex items-center justify-center text-primary-500 text-xl" style="display:flex"></i>
+            </div>
+            <p class="font-poppins font-bold text-primary-700 dark:text-primary-200 mb-1">Memproses Data</p>
+            <p class="text-xs text-primary-500 dark:text-primary-400">Menghitung dengan Metode SAW...</p>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: TAMBAH ALTERNATIF ========== -->
+    <div id="modal-add-alt" class="fixed inset-0 z-[180] flex items-center justify-center p-4 hidden">
+        <!-- Backdrop -->
+        <div id="modal-backdrop" class="absolute inset-0 bg-primary-950/60 backdrop-blur-sm"></div>
+        <!-- Dialog -->
+        <div class="relative bg-white dark:bg-[#0e2a0d] rounded-2xl shadow-2xl border border-primary-100 dark:border-primary-800 w-full max-w-lg animate-fade-in-up">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-primary-50 dark:border-primary-900">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center text-white shadow-sm">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Tambah Alternatif Baru</h3>
+                        <p class="text-xs text-slate-400 dark:text-slate-500">Isi semua data kemasan, lalu klik Tambah</p>
+                    </div>
+                </div>
+                <button id="modal-close-btn" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-primary-900 transition-all focus:outline-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Body: Input Form -->
+            <div class="px-6 py-5 space-y-4">
+                <!-- Nama Kemasan -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+                        <i class="fa-solid fa-box-open text-primary-500 mr-1"></i> Nama Kemasan <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="modal-name"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-primary-800 bg-slate-50 dark:bg-primary-950/50 text-slate-800 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-slate-300 dark:placeholder-slate-600 transition-all"
+                        placeholder="Contoh: Daun Pisang, Bambu, dsb.">
+                </div>
+
+                <!-- Dynamic criteria values input container -->
+                <div id="modal-criteria-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- JS Populated -->
+                </div>
+
+                <!-- Validation message -->
+                <p id="modal-error" class="hidden text-xs font-semibold text-rose-500 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span id="modal-error-text">Nama kemasan tidak boleh kosong!</span>
+                </p>
+            </div>
+
+            <!-- Footer: Action Buttons -->
+            <div class="px-6 py-4 bg-primary-50/40 dark:bg-primary-950/20 border-t border-primary-50 dark:border-primary-900 flex items-center justify-end gap-3 rounded-b-2xl">
+                <button id="modal-cancel-btn" class="px-5 py-2.5 border border-slate-200 dark:border-primary-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-primary-900/50 text-sm font-semibold rounded-full transition-all duration-200">
+                    Batal
+                </button>
+                <button id="modal-confirm-btn" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-full flex items-center gap-2 shadow-md shadow-primary-500/20 hover:shadow-lg transition-all duration-200">
+                    <i class="fa-solid fa-plus text-xs"></i> Tambah Alternatif
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="sticky top-0 z-[100] bg-white/90 dark:bg-[#0b2a0d]/92 backdrop-blur-md border-b border-primary-100 dark:border-primary-900 no-print shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-15 py-3">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center text-white shadow-md shadow-primary-500/25">
+                        <i class="fa-solid fa-leaf text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="font-poppins font-bold text-sm text-primary-700 dark:text-primary-300 block leading-tight">ECO Organic</span>
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">Simple Additive Weighting</span>
+                    </div>
+                </div>
+
+                <!-- Nav Links + Theme Toggle -->
+                <div class="flex items-center gap-1">
+                    <a href="#section-alternatives" class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-all">
+                        <i class="fa-solid fa-box-open text-[11px]"></i> Alternatif
+                    </a>
+                    <a href="#section-criteria" class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-all">
+                        <i class="fa-solid fa-sliders text-[11px]"></i> Kriteria
+                    </a>
+                    <button id="theme-toggle" class="ml-1 p-2 rounded-full border border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/50 text-primary-600 dark:text-primary-400 transition-all focus:outline-none" title="Ubah Tema">
+                        <i id="theme-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== MAIN ========== -->
+    <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <div class="flex flex-col lg:flex-row gap-7 items-start">
+
+            <!-- ========== SIDEBAR NAVIGATION ========== -->
+            <aside class="w-full lg:w-64 shrink-0 no-print">
+                <div class="sticky top-20 bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 p-4 shadow-sm space-y-3">
+                    <div class="px-2 pt-1 pb-2 border-b border-primary-50 dark:border-primary-900/60 flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 flex items-center gap-2">
+                            <i class="fa-solid fa-compass"></i> Navigasi SPK
+                        </h3>
+                        <span class="text-[10px] bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 font-semibold px-2 py-0.5 rounded-full">SAW</span>
+                    </div>
+                    <nav id="sidebar-nav" class="space-y-1 text-xs font-semibold">
+                        <!-- 1. Dashboard (Area utama hingga Hasil Analisis & Perangkingan SAW) -->
+                        <a href="#dashboard" data-tab="dashboard" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary-600 text-white shadow-md transition-all group">
+                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0">
+                                <i class="fa-solid fa-gauge-high"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="leading-tight truncate">Dashboard</div>
+                                <div class="text-[10px] text-white/80 font-normal truncate">Hasil & Perangkingan</div>
+                            </div>
+                        </a>
+
+                        <!-- Analysis Tables Links (User specified order) -->
+                        <div class="pt-2 pb-1 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tabel Analisis SAW</div>
+
+                        <!-- 2. Tabel Matriks Keputusan (dibawah dashboard) -->
+                        <a href="#matrix" data-tab="matrix" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-950/50 hover:text-primary-600 dark:hover:text-primary-400 transition-all group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-primary-900/40 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-primary-600 group-hover:text-white transition-all shrink-0">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <span class="truncate">Matriks Keputusan (X)</span>
+                        </a>
+
+                        <!-- 3. Normalisasi (dibawah keputusan) -->
+                        <a href="#norm" data-tab="norm" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-950/50 hover:text-primary-600 dark:hover:text-primary-400 transition-all group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-primary-900/40 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-primary-600 group-hover:text-white transition-all shrink-0">
+                                <i class="fa-solid fa-recycle"></i>
+                            </div>
+                            <span class="truncate">Matriks Normalisasi (R)</span>
+                        </a>
+
+                        <!-- 4. Preferensi (dibawah normalisasi) -->
+                        <a href="#pref" data-tab="pref" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-950/50 hover:text-primary-600 dark:hover:text-primary-400 transition-all group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-primary-900/40 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-primary-600 group-hover:text-white transition-all shrink-0">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <span class="truncate">Nilai Preferensi (Vᵢ)</span>
+                        </a>
+
+                        <!-- 5. Detail Langkah Perhitungan (dibawah preferensi) -->
+                        <a href="#detail-calc" data-tab="detail-calc" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-950/50 hover:text-primary-600 dark:hover:text-primary-400 transition-all group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-primary-900/40 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-primary-600 group-hover:text-white transition-all shrink-0">
+                                <i class="fa-solid fa-list-ol"></i>
+                            </div>
+                            <span class="truncate">Detail Perhitungan</span>
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- ========== MAIN CONTENT AREA ========== -->
+            <div class="flex-1 w-full min-w-0 space-y-6">
+
+                <!-- ===== VIEW 1: DASHBOARD ===== -->
+                <div id="view-dashboard" class="app-view space-y-6">
+                    <!-- HERO -->
+                    <header id="section-dashboard" class="scroll-mt-24 mb-7 rounded-2xl overflow-hidden shadow-lg relative min-h-[200px]">
+                        <div class="absolute inset-0" style="background-image:url('eco_hero_banner.png');background-size:cover;background-position:center;filter:blur(3px) brightness(0.4);transform:scale(1.06);"></div>
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary-900/90 via-primary-800/85 to-primary-700/80"></div>
+                        <div class="relative z-10 px-7 py-9 sm:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                            <div class="max-w-xl">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-400/20 border border-primary-400/30 text-primary-200 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                    <i class="fa-solid fa-recycle text-primary-300 text-[10px]"></i> Dashboard 
+                                </div>
+                                <h1 class="text-2xl sm:text-3xl font-extrabold font-poppins text-white leading-snug mb-3">
+                                    Sistem Pendukung Keputusan<br>
+                                    <span class="text-primary-300">Pemilihan Kemasan Makanan</span><br class="hidden sm:block"> Ramah Lingkungan
+                                </h1>
+                            </div>
+                            <div class="hidden lg:flex items-end gap-3 shrink-0 pb-1">
+                                <div class="flex flex-col gap-3">
+                                    <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-seedling text-2xl text-primary-300"></i></div>
+                                    <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-earth-asia text-2xl text-emerald-300"></i></div>
+                                </div>
+                                <div class="flex flex-col gap-3 mb-4">
+                                    <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-box-open text-2xl text-green-300"></i></div>
+                                    <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-recycle text-2xl text-primary-200"></i></div>
+                                </div>
+                                <div class="flex flex-col gap-3">
+                                    <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-leaf text-2xl text-lime-300"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- STAT CARDS -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7 no-print">
+                        <div class="card-lift bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                                <i class="fa-solid fa-box-open text-lg"></i>
+                            </div>
+                            <div>
+                                <div id="alternative-count" class="text-2xl font-bold font-poppins text-primary-700 dark:text-primary-300 leading-none">0</div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">Alternatif</div>
+                            </div>
+                        </div>
+                        <div class="card-lift bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                                <i class="fa-solid fa-list-check text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold font-poppins text-primary-700 dark:text-primary-300 leading-none">6</div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">Kriteria Aktif</div>
+                            </div>
+                        </div>
+                        <div class="card-lift bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                                <i class="fa-solid fa-scale-balanced text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="leading-none">
+                                    <span id="weight-total-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">0%</span>
+                                </div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 font-medium">Total Bobot</div>
+                            </div>
+                        </div>
+                        <div class="card-lift bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                                <i class="fa-solid fa-clipboard-check text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div id="weight-status-text" class="text-sm font-bold text-rose-500 leading-tight truncate">Belum Valid</div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">Status Bobot</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INPUT SECTIONS -->
+                    <div class="space-y-6 mb-6 no-print">
+                        <section id="section-alternatives" class="bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white shadow-sm">
+                                        <i class="fa-solid fa-box-open text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Data Alternatif Kemasan</h2>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500">Tambah, ubah, atau hapus alternatif kemasan yang akan dievaluasi</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="relative hidden sm:block">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 text-[10px]"></i>
+                                        <input type="text" placeholder="Cari kemasan..." class="pl-7 pr-3 py-1.5 text-xs border border-slate-200 dark:border-primary-800 bg-slate-50 dark:bg-primary-950/50 rounded-full text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary-400 w-32 transition-all">
+                                    </div>
+                                    <button id="btn-add-alternative" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all duration-200">
+                                        <i class="fa-solid fa-plus text-[10px]"></i> Tambah
+                                    </button>
+                                    <button id="btn-reset-default" class="px-4 py-2 border border-slate-200 dark:border-primary-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-primary-900/40 text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all duration-200">
+                                        <i class="fa-solid fa-rotate-left text-[10px]"></i> Default
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse eco-table min-w-[900px]">
+                                    <thead>
+                                        <tr class="bg-primary-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                                            <th class="py-3.5 px-5 w-20">Kode</th>
+                                            <th class="py-3.5 px-5">Nama Kemasan</th>
+                                            <th id="th-c1" class="py-3.5 px-5 text-right">Harga (Rp)</th>
+                                            <th id="th-c2" class="py-3.5 px-5 text-right">Terurai (Hari)</th>
+                                            <th id="th-c3" class="py-3.5 px-5 text-right">Panas (°C)</th>
+                                            <th id="th-c4" class="py-3.5 px-5 text-right">Beban (g)</th>
+                                            <th id="th-c5" class="py-3.5 px-5 text-right">Volume (ml)</th>
+                                            <th id="th-c6" class="py-3.5 px-5 text-right">Berat (g)</th>
+                                            <th class="py-3.5 px-5 text-center w-16">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="alternative-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40 text-sm">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-3 bg-primary-50/40 dark:bg-primary-950/20 border-t border-primary-50 dark:border-primary-900/60 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-primary-400 text-[11px]"></i> Minimal 2 alternatif untuk kalkulasi perangkingan</span>
+                                <span class="font-semibold text-primary-600 dark:text-primary-400 bg-primary-100 dark:bg-primary-900/60 px-2.5 py-0.5 rounded-full">Data tabel aktif</span>
+                            </div>
+                        </section>
+
+                        <section id="section-criteria" class="bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white shadow-sm">
+                                        <i class="fa-solid fa-sliders text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Bobot & Jenis Kriteria</h2>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500">Atur bobot kepentingan setiap kriteria dan total harus mencapai <strong class="text-primary-600 dark:text-primary-400">100%</strong></p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button id="btn-add-criteria" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all duration-200">
+                                        <i class="fa-solid fa-plus text-[10px]"></i> Tambah Kriteria
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/80">
+                                <div class="bg-primary-50/70 dark:bg-primary-950/40 rounded-xl px-4 py-3 border border-primary-100 dark:border-primary-900">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Alokasi Bobot Total</span>
+                                        <span class="text-xs font-bold text-rose-500">Lihat Stat Card</span>
+                                    </div>
+                                    <div class="h-2 w-full bg-slate-200 dark:bg-primary-900 rounded-full overflow-hidden">
+                                        <div id="weight-progress-bar" class="h-full eco-bar rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-primary-50 dark:bg-primary-950/40 text-[10px] text-primary-700 dark:text-primary-400 font-bold uppercase tracking-widest border-b border-primary-100 dark:border-primary-900">
+                                            <th class="py-3 px-5 w-10">#</th>
+                                            <th class="py-3 px-5">Nama Kriteria</th>
+                                            <th class="py-3 px-5 text-center w-28">Jenis</th>
+                                            <th class="py-3 px-5">Slider Bobot</th>
+                                            <th class="py-3 px-5 text-center w-20">Nilai (%)</th>
+                                            <th class="py-3 px-5 text-center w-28">Status / Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="criteria-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40">
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="px-6 py-4 bg-primary-50/40 dark:bg-primary-950/20 border-t border-primary-50 dark:border-primary-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div class="text-sm font-medium">
+                                    <span id="validation-warning" class="hidden text-rose-500 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Total bobot harus 100% sebelum menghitung!
+                                    </span>
+                                    <span id="validation-success" class="text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check"></i> Konfigurasi bobot valid (100%) 
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                                    <button id="btn-reset-all" class="flex-1 sm:flex-initial px-5 py-2.5 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-sm font-semibold rounded-full transition-all duration-200">
+                                        <i class="fa-solid fa-trash-can"></i> Reset Semua
+                                    </button>
+                                    <button id="btn-calculate" class="flex-1 sm:flex-initial px-8 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-full flex items-center justify-center gap-2 shadow-md shadow-primary-500/20 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                                        <i class="fa-solid fa-calculator"></i> Hitung SAW
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- DASHBOARD RESULTS (Leaderboard, Viz, Rekomendasi) -->
+                    <div id="results-section" class="hidden space-y-6 transition-all duration-500 opacity-0 transform translate-y-4 print-container">
+                        <hr class="border-primary-100 dark:border-primary-900 no-print">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
+                            <div>
+                                <h2 class="text-xl font-bold font-poppins text-slate-800 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-bar text-primary-500"></i> Hasil Analisis & Perangkingan SAW
+                                </h2>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Hasil rangking dan analisis rekomendasi kemasan ramah lingkungan terbaik</p>
+                            </div>
+                            <div class="flex items-center gap-2 no-print">
+                                <button id="btn-print" class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-full flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200">
+                                    <i class="fa-solid fa-file-word"></i> Unduh Word
+                                </button>
+                                <button id="btn-export-csv" class="px-5 py-2.5 border border-primary-300 dark:border-primary-800 text-primary-700 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/40 text-xs font-semibold rounded-full flex items-center gap-2 transition-all duration-200">
+                                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 print-container">
+                            <section class="lg:col-span-3 print-container">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fa-solid fa-ranking-star text-primary-600 text-base"></i>
+                                    <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Perangkingan Akhir</h3>
+                                </div>
+                                <div class="bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden">
+                                    <table class="w-full text-left border-collapse eco-table">
+                                        <thead>
+                                            <tr class="bg-primary-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                                                <th class="py-3.5 px-5 text-center w-24">Peringkat</th>
+                                                <th class="py-3.5 px-5 w-20">Kode</th>
+                                                <th class="py-3.5 px-5">Nama Kemasan</th>
+                                                <th class="py-3.5 px-5 text-right">Nilai (Vᵢ)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rank-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40 text-sm">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section class="lg:col-span-2 flex flex-col gap-4" id="viz-section">
+                                <div id="viz-dashboard"></div>
+                                <canvas id="ranking-chart" style="display:none;width:0;height:0;"></canvas>
+                            </section>
+                        </div>
+
+                        <section id="conclusion-card" class="bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-800 dark:to-primary-900 rounded-2xl border border-primary-500/20 shadow-xl p-6 sm:p-8 flex flex-col sm:flex-row items-start gap-6 print-container">
+                            <div class="w-16 h-16 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-seedling text-3xl text-primary-200"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="text-primary-200 text-[10px] font-bold uppercase tracking-widest mb-1">Rekomendasi Utama SAW</div>
+                                <h3 class="font-poppins font-bold text-lg text-white mb-3">Kemasan Makanan Terbaik</h3>
+                                <div id="conclusion-text" class="text-primary-100 text-sm leading-relaxed space-y-1.5">
+                                </div>
+                                <div class="mt-5 pt-4 border-t border-white/15 flex items-center gap-2 text-xs text-primary-300">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Berdasarkan analisis metode <strong class="text-primary-200">Simple Additive Weighting (SAW)</strong></span>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ===== VIEW 2: MATRIKS KEPUTUSAN ===== -->
+                <div id="view-matrix" class="app-view hidden space-y-6">
+                    <div class="flex items-center justify-between bg-white dark:bg-[#0e2a0d] p-4 rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-database text-primary-500"></i> Tabel Matriks Keputusan (X)</h2>
+                            <p class="text-xs text-slate-400">Nilai mentah seluruh atribut kriteria dari alternatif kemasan</p>
+                        </div>
+                        <button class="btn-back-dashboard px-4 py-2 bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 text-xs font-semibold rounded-full hover:bg-primary-100 transition-all">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Dashboard
+                        </button>
+                    </div>
+                    <div class="empty-results-notice hidden bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-6 rounded-2xl text-center text-amber-800 dark:text-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-amber-500"></i>
+                        <p class="font-bold">Belum Ada Perhitungan SAW</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Silakan klik <strong>"Hitung SAW"</strong> di Dashboard terlebih dahulu untuk menampilkan data pada tabel ini.</p>
+                    </div>
+                    <section id="section-matrix" class="scroll-mt-24 bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden print-container">
+                        <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/60 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                <i class="fa-solid fa-database text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Tabel Matriks Keputusan (X)</h3>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">Nilai atribut mentah setiap alternatif kemasan makanan</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse eco-table min-w-[800px]">
+                                <thead>
+                                    <tr class="bg-primary-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                                        <th class="py-3 px-5 w-20">Kode</th>
+                                        <th class="py-3 px-5">Nama Kemasan</th>
+                                        <th id="dm-th-c1" class="py-3 px-5 text-right">Harga (Rp)</th>
+                                        <th id="dm-th-c2" class="py-3 px-5 text-right">Terurai (Hari)</th>
+                                        <th id="dm-th-c3" class="py-3 px-5 text-right">Panas (°C)</th>
+                                        <th id="dm-th-c4" class="py-3 px-5 text-right">Beban (g)</th>
+                                        <th id="dm-th-c5" class="py-3 px-5 text-right">Volume (ml)</th>
+                                        <th id="dm-th-c6" class="py-3 px-5 text-right">Berat (g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="matrix-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===== VIEW 3: NORMALISASI ===== -->
+                <div id="view-norm" class="app-view hidden space-y-6">
+                    <div class="flex items-center justify-between bg-white dark:bg-[#0e2a0d] p-4 rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-recycle text-primary-500"></i> Tabel Matriks Normalisasi (R)</h2>
+                            <p class="text-xs text-slate-400">Hasil normalisasi skala 0–1 berdasarkan tipe kriteria Benefit dan Cost</p>
+                        </div>
+                        <button class="btn-back-dashboard px-4 py-2 bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 text-xs font-semibold rounded-full hover:bg-primary-100 transition-all">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Dashboard
+                        </button>
+                    </div>
+                    <div class="empty-results-notice hidden bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-6 rounded-2xl text-center text-amber-800 dark:text-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-amber-500"></i>
+                        <p class="font-bold">Belum Ada Perhitungan SAW</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Silakan klik <strong>"Hitung SAW"</strong> di Dashboard terlebih dahulu untuk menampilkan data pada tabel ini.</p>
+                    </div>
+                    <section id="section-norm" class="scroll-mt-24 bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden print-container">
+                        <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/60 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                <i class="fa-solid fa-recycle text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Tabel Matriks Normalisasi (R)</h3>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">Normalisasi nilai atribut sesuai tipe Benefit/Cost (skala 0–1)</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="norm-table" class="w-full text-left border-collapse eco-table min-w-[800px]">
+                                <thead>
+                                    <tr class="bg-primary-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                                        <th class="py-3 px-5 w-20">Kode</th>
+                                        <th class="py-3 px-5">Nama Kemasan</th>
+                                        <th id="norm-th-c1" class="py-3 px-5 text-right">Harga (R1)</th>
+                                        <th id="norm-th-c2" class="py-3 px-5 text-right">Terurai (R2)</th>
+                                        <th id="norm-th-c3" class="py-3 px-5 text-right">Panas (R3)</th>
+                                        <th id="norm-th-c4" class="py-3 px-5 text-right">Beban (R4)</th>
+                                        <th id="norm-th-c5" class="py-3 px-5 text-right">Volume (R5)</th>
+                                        <th id="norm-th-c6" class="py-3 px-5 text-right">Berat (R6)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="norm-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-2.5 bg-primary-50/40 dark:bg-primary-950/20 border-t border-primary-50 dark:border-primary-900/60 flex gap-5 flex-wrap text-xs text-slate-400 dark:text-slate-500">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-100 dark:bg-green-950 border border-green-300 dark:border-green-800"></span> Nilai Tertinggi (Kecocokan Maks)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-100 dark:bg-red-950 border border-red-300 dark:border-red-800"></span> Nilai Terendah (Kecocokan Min)</span>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===== VIEW 4: PREFERENSI ===== -->
+                <div id="view-pref" class="app-view hidden space-y-6">
+                    <div class="flex items-center justify-between bg-white dark:bg-[#0e2a0d] p-4 rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-chart-line text-primary-500"></i> Tabel Nilai Preferensi (Vᵢ)</h2>
+                            <p class="text-xs text-slate-400">Hasil akumulasi perkalian bobot kriteria x nilai normalisasi</p>
+                        </div>
+                        <button class="btn-back-dashboard px-4 py-2 bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 text-xs font-semibold rounded-full hover:bg-primary-100 transition-all">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Dashboard
+                        </button>
+                    </div>
+                    <div class="empty-results-notice hidden bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-6 rounded-2xl text-center text-amber-800 dark:text-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-amber-500"></i>
+                        <p class="font-bold">Belum Ada Perhitungan SAW</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Silakan klik <strong>"Hitung SAW"</strong> di Dashboard terlebih dahulu untuk menampilkan data pada tabel ini.</p>
+                    </div>
+                    <section id="section-pref" class="scroll-mt-24 bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden print-container">
+                        <div class="px-6 py-4 border-b border-primary-50 dark:border-primary-900/60 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-950/60 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                <i class="fa-solid fa-chart-line text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Tabel Nilai Preferensi</h3>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">Hasil perkalian normalisasi × bobot per kriteria, dijumlahkan menjadi nilai akhir Vᵢ</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse eco-table min-w-[900px]">
+                                <thead>
+                                    <tr class="bg-primary-600 text-white text-[10px] font-bold uppercase tracking-widest">
+                                        <th class="py-3 px-5 w-20">Kode</th>
+                                        <th class="py-3 px-5">Nama Kemasan</th>
+                                        <th id="pref-th-c1" class="py-3 px-5 text-right">Harga</th>
+                                        <th id="pref-th-c2" class="py-3 px-5 text-right">Terurai</th>
+                                        <th id="pref-th-c3" class="py-3 px-5 text-right">Panas</th>
+                                        <th id="pref-th-c4" class="py-3 px-5 text-right">Beban</th>
+                                        <th id="pref-th-c5" class="py-3 px-5 text-right">Volume</th>
+                                        <th id="pref-th-c6" class="py-3 px-5 text-right">Berat</th>
+                                        <th class="py-3 px-5 text-right bg-primary-700">Total (Vᵢ)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pref-tbody" class="divide-y divide-primary-50/70 dark:divide-primary-900/40 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===== VIEW 5: DETAIL PERHITUNGAN ===== -->
+                <div id="view-detail-calc" class="app-view hidden space-y-6">
+                    <div class="flex items-center justify-between bg-white dark:bg-[#0e2a0d] p-4 rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-list-ol text-primary-500"></i> Detail Langkah Perhitungan SAW</h2>
+                            <p class="text-xs text-slate-400">Penjelasan rinci rumus aljabar dari Min/Max hingga Perangkingan</p>
+                        </div>
+                        <button class="btn-back-dashboard px-4 py-2 bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 text-xs font-semibold rounded-full hover:bg-primary-100 transition-all">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Dashboard
+                        </button>
+                    </div>
+                    <div class="empty-results-notice hidden bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-6 rounded-2xl text-center text-amber-800 dark:text-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-amber-500"></i>
+                        <p class="font-bold">Belum Ada Perhitungan SAW</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Silakan klik <strong>"Hitung SAW"</strong> di Dashboard terlebih dahulu untuk menampilkan detail perhitungan ini.</p>
+                    </div>
+                    <section id="section-detail-calc" class="scroll-mt-24 bg-white dark:bg-[#0e2a0d] rounded-2xl border border-primary-100 dark:border-primary-900 shadow-sm overflow-hidden no-print">
+                        <button id="btn-accordion" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-primary-50/50 dark:hover:bg-primary-950/20 transition-colors focus:outline-none">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                    <i class="fa-solid fa-list-ol text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-poppins font-bold text-sm text-slate-800 dark:text-white">Detail Langkah Perhitungan SAW</h3>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500">Step-by-step: Min/Max → Normalisasi → Preferensi → Perangkingan</p>
+                                </div>
+                            </div>
+                            <i id="accordion-icon" class="fa-solid fa-chevron-down text-slate-400 dark:text-slate-600 transition-transform duration-300"></i>
+                        </button>
+                        <div id="accordion-content" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out border-t border-transparent">
+                            <div class="p-6 border-t border-primary-50 dark:border-primary-900/60 bg-[#f8fdf8] dark:bg-primary-950/10">
+                                <div id="calculation-steps-details" class="space-y-0">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="bg-white dark:bg-[#071809] border-t border-primary-100 dark:border-primary-900 py-5 mt-8 no-print transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="text-xs text-slate-400 dark:text-slate-600 font-medium">
+                &copy; 2026 SPK Pemilihan Kemasan Makanan Ramah Lingkungan
+            </p>
+            <p class="text-xs text-slate-400 dark:text-slate-600 font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-leaf text-primary-500"></i> Eco Organic
+            </p>
+        </div>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
